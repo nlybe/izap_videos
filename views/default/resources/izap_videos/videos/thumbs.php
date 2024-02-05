@@ -24,7 +24,6 @@ if (!$guid) {
 if (!$guid) {
 	$guid = (int) elgg_extract('videoID', $vars);
 }
-
 $what = (string) elgg_extract('what', $vars);
 
 $izap_videos = 0;
@@ -32,14 +31,14 @@ if ($guid) {
 	$izap_videos = get_entity($guid);
 }
 $contents = '';
-if ($izap_videos && ($izap_videos instanceof IzapVideos)) {
+if ($izap_videos && ($izap_videos instanceof \IzapVideos)) {
 	// check what is needed
 	if ($what == 'image') {
 		$filename = $izap_videos->imagesrc;
 	} elseif (!isset($what) || empty($what) || $what == 'file') {
 		$filename = $izap_videos->videofile;
 	}
-
+	
 	// only works if there is some file name
 	if ($filename != '') {
 		$fileHandler = new ElggFile();
@@ -49,7 +48,7 @@ if ($izap_videos && ($izap_videos instanceof IzapVideos)) {
 		if ($what == 'image') {
 			$contents = elgg_get_inline_url($fileHandler);
 		} elseif (!isset($what) || empty($what) || $what == 'file') {
-			$contents = elgg_get_download_url($fileHandler);
+			$contents = $izap_videos->getFilenameOnFilestore();
 		}
 	}
 }
@@ -58,4 +57,13 @@ if (!$contents) {
 	$contents = elgg_get_simplecache_url("izap_videos/izapdesign_logo.gif");
 }
 
-forward($contents);
+$filesize = @filesize($contents);
+if ($filesize) {
+    header("Content-type: image/jpeg");
+    header('Expires: ' . gmdate('D, d M Y H:i:s \G\M\T', strtotime("+6 months")), true);
+    header("Pragma: public");
+    header("Cache-Control: public");
+    header("Content-Length: $contents");
+    readfile($contents);
+    exit;
+}

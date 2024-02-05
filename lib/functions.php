@@ -54,7 +54,8 @@ function izapAdminSettings_izap_videos($settingName, $values = '', $override = f
 	}
 	// if it is not set yet
 	if (empty($oldSetting) || $override) {
-		if (!elgg_set_plugin_setting($settingName, $pluginValues, 'izap_videos')) {
+		$plugin = elgg_get_plugin_from_id('izap_videos');
+		if (!$plugin->setSetting($settingName, $pluginValues)) {
 			return false;
 		}
 	}

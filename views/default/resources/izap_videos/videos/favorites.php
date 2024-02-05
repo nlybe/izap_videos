@@ -4,7 +4,7 @@ $owner = elgg_get_page_owner_entity();
 
 if (!$owner) {
 	$guid = elgg_extract('guid', $vars);
-	$owner = get_user($guid);
+	$owner = get_user(intval($guid));
 }
 
 if (!$owner) {
@@ -23,7 +23,7 @@ if (!($owner instanceof ElggUser)) {
 elgg_push_collection_breadcrumbs('object', 'izap_videos', $owner);
 elgg_push_breadcrumb(elgg_echo('izap_videos:favorites_short'));
 
-elgg_register_title_button('videos', 'add', 'object', 'izap_videos');
+elgg_register_title_button('add', 'object', 'izap_videos');
 
 $title = elgg_echo('collection:object:izap_videos:favorites', [$owner->name]);
 

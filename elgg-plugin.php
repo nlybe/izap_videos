@@ -2,16 +2,32 @@
 
 require_once(dirname(__FILE__) . '/lib/settings.php');
 require_once(dirname(__FILE__) . '/lib/functions.php');
-require_once(dirname(__FILE__) . '/lib/hooks.php');
+require_once(dirname(__FILE__) . '/lib/events.php');
 
 return [
+    'plugin' => [
+        'name' => 'iZAP Videos',
+		'version' => '5.4.0',
+		'dependencies' => [
+			'widget_manager' => [
+				'must_be_active' => false,
+            ],
+			'elggx_fivestar' => [
+				'must_be_active' => false,
+            ],
+        ],
+	],	
 	'bootstrap' => \IzapVideosBootstrap::class,
 	'entities' => [
 		[
 			'type' => 'object',
 			'subtype' => 'izap_videos',
 			'class' => 'IzapVideos',
-			'searchable' => true,
+            'capabilities' => [
+				'commentable' => true,
+				'searchable' => true,
+				'likable' => true,
+			],
 		],
 	],
 	'actions' => [
@@ -180,6 +196,43 @@ return [
 			'resource' => 'izap_videos/videos/thumbs',
 		],	
 	],
+    'events' => [
+        'entity:url' => [
+            'object' => [
+				'izap_videos_widget_urls' => [],
+                'izap_videos_urlhandler' => [],
+            ],
+        ],
+        'register' => [        
+            'menu:social' => [
+                'izap_videos_social_menu_setup' => [],
+            ],      
+            'menu:owner_block' => [
+                'izap_videos_owner_block_menu' => [],
+            ],     
+            'menu:entity' => [
+                'izap_videos_entity_menu_setup' => [],
+            ],     
+            'menu:filter:izap_videos_tabs' => [
+                'izap_videos_setup_tabs' => [],
+            ],
+        ],
+        'view' => [ 
+            'river/object/comment/create' => [
+                'izap_videos_river_comment' => [],
+            ],
+        ],
+        'prepare' => [ 
+            'notification:create:object:izap_videos' => [
+                'izap_videos_notify_message' => [],
+            ],
+        ],
+        'group_tool_widgets' => [ 
+            'widget_manager' => [
+                'izap_videos_tool_widget_handler' => [],
+            ],
+        ],
+    ],
 	'widgets' => [
 		'izap_videos' => [
 			'context' => ['profile', 'dashboard'],

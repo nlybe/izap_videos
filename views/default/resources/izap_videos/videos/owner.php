@@ -10,7 +10,7 @@ if (!$owner) {
 	throw new \Elgg\EntityNotFoundException();
 }
 
-elgg_register_title_button('videos', 'add', 'object', 'izap_videos');
+elgg_register_title_button('add', 'object', 'izap_videos');
 
 elgg_push_collection_breadcrumbs('object', 'izap_videos', $owner);
 
@@ -35,7 +35,6 @@ $params = [
 	'filter_id' => 'izap_videos_tabs',
 	'filter_value' => 'mine',
 	'content' => $result,
-	'title' => $title,
 	'sidebar' => elgg_view('izap_videos/sidebar', ['page' => 'owner']),
 ];
 
@@ -44,6 +43,4 @@ if ($owner->guid != elgg_get_logged_in_user_guid()) {
 	$params['filter'] = '';
 }
 
-$body = elgg_view_layout('default', $params);
-
-echo elgg_view_page($title, $body);
+echo elgg_view_page($title, $params);

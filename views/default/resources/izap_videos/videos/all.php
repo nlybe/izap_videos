@@ -1,6 +1,6 @@
 <?php
 
-elgg_register_title_button('izap_videos', 'add', 'object', 'izap_videos');
+elgg_register_title_button('add', 'object', 'izap_videos');
 
 elgg_push_collection_breadcrumbs('object', 'izap_videos');
 
@@ -28,6 +28,4 @@ if (!elgg_is_logged_in()) {
 	$params['filter'] = '';
 }
 
-$body = elgg_view_layout('default', $params);
-
-echo elgg_view_page($title, $body);
+echo elgg_view_page($title, $params);

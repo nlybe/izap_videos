@@ -11,16 +11,24 @@ elgg_push_entity_breadcrumbs($izap_videos, false);
 $title = $izap_videos->title;
 
 if (elgg_is_logged_in()) {
-	elgg_register_title_button('videos', 'add', 'object', 'izap_videos');
+	elgg_register_title_button('add', 'object', 'izap_videos');
 }
 
 $content = elgg_view_entity($izap_videos, ['full_view' => true]);
 
-$body = elgg_view_layout('default', [
-	'content' => $content,
-	'title' => $title,
-	'filter' => '',
-	'sidebar' => elgg_view('izap_videos/sidebar', ['page' => 'play']),
-]);
+// $body = elgg_view_layout('default', [
+// 	'content' => $content,
+// 	'title' => $title,
+// 	'filter' => '',
+// 	'sidebar' => elgg_view('izap_videos/sidebar', ['page' => 'play']),
+// ]);
+// echo elgg_view_page($title, $body);
 
-echo elgg_view_page($title, $body);
+echo elgg_view_page($title, [
+	'content' => $content,
+	'filter_id' => '',
+	'entity' => $izap_videos,
+	'sidebar' => elgg_view('izap_videos/sidebar', ['page' => 'play']),
+], 'default', [
+	'entity' => $izap_videos,
+]);

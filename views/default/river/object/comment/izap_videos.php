@@ -25,7 +25,7 @@ if (!$subject instanceof ElggUser) {
 	return;
 }
 
-$vars['message'] = elgg_get_excerpt($comment->description);
+$vars['message'] = $comment->description ? elgg_get_excerpt($comment->description) : '';
 
 $subject_link = elgg_view('output/url', [
 	'href' => $subject->getURL(),

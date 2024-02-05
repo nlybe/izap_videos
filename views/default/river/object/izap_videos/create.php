@@ -16,7 +16,7 @@ if (!$video instanceof IzapVideos) {
 }
 
 $excerpt = strip_tags($video->description);
-$excerpt = elgg_get_excerpt($excerpt);
+$excerpt = $excerpt ? elgg_get_excerpt($excerpt) : '';
 $vars['message'] = $excerpt;
 
 $size = izapAdminSettings_izap_videos('izap_river_thumbnails');

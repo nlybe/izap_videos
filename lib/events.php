@@ -3,16 +3,16 @@
 /**
  * Add a menu item to an ownerblock
  */
-function izap_videos_owner_block_menu(\Elgg\Hook $hook) {
-	$menu = $hook->getValue();
-	$entity = $hook->getParam('entity');
+function izap_videos_owner_block_menu(\Elgg\Event $event) {
+	$menu = $event->getValue();
+	$entity = $event->getParam('entity');
 
-	if ($entity instanceof ElggUser) {
+	if ($entity instanceof \ElggUser) {
 		$url = "videos/owner/{$entity->username}";
 		$item = new ElggMenuItem('izap_videos', elgg_echo('videos'), $url);
 		$menu[] = $item;
 	} else {
-		if ($entity->izap_videos_enable != "no") {
+		if ($entity->isToolEnabled('izap_videos')) {
 			$url = "videos/group/{$entity->guid}";
 			$item = new ElggMenuItem('izap_videos', elgg_echo('collection:object:izap_videos:group'), $url);
 			$menu[] = $item;
@@ -25,10 +25,10 @@ function izap_videos_owner_block_menu(\Elgg\Hook $hook) {
 /**
  * Add entries to entity menu
  */
-function izap_videos_entity_menu_setup(\Elgg\Hook $hook) {
-	$menu = $hook->getValue();
+function izap_videos_entity_menu_setup(\Elgg\Event $event) {
+	$menu = $event->getValue();
 
-	$entity = $hook->getParam('entity');
+	$entity = $event->getParam('entity');
 
 	if (!($entity instanceof IzapVideos)) {
 		return $menu;
@@ -53,57 +53,46 @@ function izap_videos_entity_menu_setup(\Elgg\Hook $hook) {
 /**
  * Add entries to social menu
  */
-function izap_videos_social_menu_setup(\Elgg\Hook $hook) {
-	$menu = $hook->getValue();
+function izap_videos_social_menu_setup(\Elgg\Event $event) {
+	$menu = $event->getValue();
 
 	if (elgg_in_context('widgets')) {
 		return $menu;
 	}
 
-	$entity = $hook->getParam('entity');
-
-	if (!($entity instanceof IzapVideos)) {
+	$entity = $event->getParam('entity');
+	if (!($entity instanceof \IzapVideos)) {
 		return $menu;
 	}
 
 	if ($entity->converted == 'yes') {
 		if (izap_is_my_favorited($entity)) {
-			$url = elgg_get_site_url() . 'action/izap_videos/favorite_video?guid=' . $entity->guid . '&izap_action=remove';
-
-			$params = [
-				'href' => $url,
-				'text' => elgg_format_element('img', ['src' => elgg_get_simplecache_url('izap_videos/favorite_remove.png'), 'alt' => elgg_echo('izap_videos:remove_favorite')], ''),
+			$menu[] = ElggMenuItem::factory([
+				'name' => 'remove_favorite',
+				'href' => elgg_get_site_url() . 'action/izap_videos/favorite_video?guid=' . $entity->guid . '&izap_action=remove',
+				'text' => elgg_view('output/img', [
+					'src' => elgg_get_simplecache_url('izap_videos/favorite_remove.png'), 
+					'alt' => elgg_echo('izap_videos:remove_favorite'),
+				]),
+				'priority' => 80,
 				'title' => elgg_echo('izap_videos:remove_favorite'),
 				'is_action' => true,
 				'is_trusted' => true,
-			];
-			$text = elgg_view('output/url', $params);
-
-			$options = [
-				'name' => 'remove_favorite',
-				'text' => $text,
-				'priority' => 80,
-			];
-			$menu[] = ElggMenuItem::factory($options);
+			]);
 
 		} else {
-			$url = elgg_get_site_url() . 'action/izap_videos/favorite_video?guid=' . $entity->guid;
-
-			$params = [
-				'href' => $url,
-				'text' => elgg_format_element('img', ['src' => elgg_get_simplecache_url('izap_videos/favorite_add.png'), 'alt' => elgg_echo('izap_videos:save_favorite')], ''),
+			$menu[] = ElggMenuItem::factory([
+				'name' => 'make_favorite',
+				'text' => elgg_view('output/img', [
+					'src' => elgg_get_simplecache_url('izap_videos/favorite_add.png'), 
+					'alt' => elgg_echo('izap_videos:save_favorite'),
+				]),
+				'href' => elgg_get_site_url() . 'action/izap_videos/favorite_video?guid=' . $entity->guid,
+				'priority' => 80,
 				'title' => elgg_echo('izap_videos:save_favorite'),
 				'is_action' => true,
 				'is_trusted' => true,
-			];
-			$text = elgg_view('output/url', $params);
-
-			$options = [
-				'name' => 'make_favorite',
-				'text' => $text,
-				'priority' => 80,
-			];
-			$menu[] = ElggMenuItem::factory($options);
+			]);
 		}
 	}
 
@@ -125,9 +114,9 @@ function izap_videos_social_menu_setup(\Elgg\Hook $hook) {
  * Returns the url for the video to play
  *
  */
-function izap_videos_urlhandler(\Elgg\Hook $hook) {
-	$entity = $hook->getParam('entity');
-	if ($entity instanceof IzapVideos) {
+function izap_videos_urlhandler(\Elgg\Event $event) {
+	$entity = $event->getParam('entity');
+	if ($entity instanceof \IzapVideos) {
 		if (!$entity->getOwnerEntity()) {
 			// default to a standard view if no owner.
 			return false;
@@ -151,9 +140,9 @@ function izap_videos_urlhandler(\Elgg\Hook $hook) {
 	}
 }
 
-function izap_videos_river_comment(\Elgg\Hook $hook) {
-	$return_value = $hook->getValue();
-	$params = $hook->getParams();
+function izap_videos_river_comment(\Elgg\Event $event) {
+	$return_value = $event->getValue();
+	$params = $event->getParams();
 
 	$view = $params["view"];
 
@@ -171,9 +160,9 @@ function izap_videos_river_comment(\Elgg\Hook $hook) {
  * Prepare a notification message about a new video added to the site
  *
  */
-function izap_videos_notify_message(\Elgg\Hook $hook) {
-	$notification = $hook->getValue();
-	$params = $hook->getParams();
+function izap_videos_notify_message(\Elgg\Event $event) {
+	$notification = $event->getValue();
+	$params = $event->getParams();
 
 	$entity = $params['event']->getObject();
 
@@ -194,13 +183,13 @@ function izap_videos_notify_message(\Elgg\Hook $hook) {
 	}
 }
 
-function izap_queue_cron(\Elgg\Hook $hook) {
+function izap_queue_cron(\Elgg\Event $event) {
 	izapTrigger_izap_videos();
 }
 
-function izap_videos_widget_urls(\Elgg\Hook $hook) {
-	$result = $hook->getValue();
-	$widget = $hook->getParam('entity');
+function izap_videos_widget_urls(\Elgg\Event $event) {
+	$result = $event->getValue();
+	$widget = $event->getParam('entity');
 
 	if (empty($result) && ($widget instanceof ElggWidget)) {
 		$owner = $widget->getOwnerEntity();
@@ -224,9 +213,9 @@ function izap_videos_widget_urls(\Elgg\Hook $hook) {
 }
 
 // Add or remove a group's iZAP Videos widget based on the corresponding group tools option
-function izap_videos_tool_widget_handler(\Elgg\Hook $hook) {
-	$return_value = $hook->getValue();
-	$entity = $hook->getParam('entity', false);
+function izap_videos_tool_widget_handler(\Elgg\Event $event) {
+	$return_value = $event->getValue();
+	$entity = $event->getParam('entity', false);
 
 	if ($entity && ($entity instanceof ElggGroup)) {
 		if (!is_array($return_value)) {
@@ -253,13 +242,13 @@ function izap_videos_tool_widget_handler(\Elgg\Hook $hook) {
 /**
  * Add favorites tab to /videos/all /videos/mine /videos/friends /videos/favorites pages
  *
- * @param \Elgg\Hook $hook "register", "menu:filter:izap_videos_tabs"
+ * @param \Elgg\Event $event "register", "menu:filter:izap_videos_tabs"
  *
  * @return ElggMenuItem[]
  */
-function izap_videos_setup_tabs(\Elgg\Hook $hook) {
-	$result = $hook->getValue();
-	$filter_value = $hook->getParam('filter_value');
+function izap_videos_setup_tabs(\Elgg\Event $event) {
+	$result = $event->getValue();
+	$filter_value = $event->getParam('filter_value');
 	
 	$result['all'] = \ElggMenuItem::factory([
 		'name' => 'izap_videos_all_tab',

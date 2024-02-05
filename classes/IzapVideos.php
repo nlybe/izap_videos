@@ -189,33 +189,30 @@ class IzapVideos extends ElggFile {
 		return $html;
 	}
 
-	/**
-	 * Returns the thumbnail for the video
-	 *
-	 * @param boolean $pathOnly if we want the img src only or full <img ... /> tag
-	 * @param array $attArray attributes for the <img /> tag
-	 * @return HTML <img /> tag or image src
-	 */
-	public function getThumb($pathOnly = false, $attArray = []) {
-		global $IZAPSETTINGS;
-		$html = '';
-		$imagePath = $IZAPSETTINGS->filesPath . 'image/' . $this->guid . '/' . elgg_get_friendly_title($this->title) . '.jpg';
-
-		if ($pathOnly) {
-			$html = $imagePath;
-		} else {
-			$attributes = [];
-			if (count($attArray) > 0) {
-				foreach ($attArray as $att => $value) {
-					$attributes[$att] = $value;
-				}
-				$attributes['src'] = $imagePath;
-			}
-			$html = elgg_format_element('img', $attributes, '');
-		}
-
-		return $html;
-	}
+    /**
+     * Get icon of entity
+     * 
+     * @return icon photo
+     */
+    function getThumb($size = 'small') {
+		$options = [
+			'href' => $this->getURL(),
+			'title' => $this->title,
+			'is_trusted' => true,
+		];
+        if ($this->hasIcon($size)) {
+			$options['img_class'] = 'elgg-photo izap-photo';
+            return elgg_view_entity_icon($this, $size, $options);
+        }
+         
+		
+        $options['text'] = elgg_view('output/img', [
+			'src' => elgg_get_simplecache_url('izap_videos/default_icon.png'),
+			'alt' => $this->title,
+			'class' => 'elgg-photo izap-photo',
+		]);
+		return elgg_view('output/url', $options);
+    }
 
 	/**
 	 * Updates the video views
@@ -270,7 +267,7 @@ class IzapVideos extends ElggFile {
 	 *
 	 * @return boolean
 	 */
-	public function delete($follow_symlinks = true) {
+	public function delete($follow_symlinks = true): bool {
 		// in case of an uploaded video make sure it's also deleted from queue and trash
 		// with related media if it still remained there
 		if ($this->videotype == 'uploaded') {
@@ -279,9 +276,9 @@ class IzapVideos extends ElggFile {
 			$queue_object->delete($this->guid, true);
 		}
 
-		$imagesrc = $this->imagesrc;
-		$filesrc = $this->videofile;
-		$ofilesrc = $this->orignalfile;
+		$imagesrc = $this->imagesrc?$this->imagesrc:'';
+		$filesrc = $this->videofile?$this->videofile:'';
+		$ofilesrc = $this->orignalfile?$this->orignalfile:'';
 		//delete entity from elgg db and corresponding files if exist
 		$this->setFilename($imagesrc);
 		$image_file = $this->getFilenameOnFilestore();
